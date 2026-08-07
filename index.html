@@ -42,8 +42,10 @@
             display: flex;
             justify-content: space-around;
             margin-bottom: 8px;
-            font-size: 17px;
+            font-size: 16px;
             font-weight: bold;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
         #score {
@@ -52,6 +54,10 @@
 
         #speed {
             color: #e67e22;
+        }
+
+        #highScore {
+            color: #8e44ad;
         }
 
         #gameCanvas {
@@ -88,6 +94,7 @@
         <h1>🏃 CORRIDA F-E-K</h1>
         <div class="info">
             <span id="score">Pontos: 0</span>
+            <span id="highScore">Recorde: 0</span>
             <span id="speed">Velocidade: 1</span>
         </div>
         <canvas id="gameCanvas" width="520" height="780"></canvas>
@@ -106,6 +113,7 @@
         const ctx = canvas.getContext('2d');
         const scoreEl = document.getElementById('score');
         const speedEl = document.getElementById('speed');
+        const highScoreEl = document.getElementById('highScore');
         const messageEl = document.getElementById('message');
 
         const LANE_WIDTH = canvas.width / 3;
@@ -122,6 +130,11 @@
         let frameCount = 0;
         let runFrame = 0;
         let bodyBounce = 0;
+
+        // ===== RECORDE =====
+        let highScore = localStorage.getItem('corridaFEK_highScore') || 0;
+        highScore = parseInt(highScore);
+        highScoreEl.textContent = 'Recorde: ' + highScore;
 
         let impactTimer = 0;
         let shakeX = 0;
@@ -721,9 +734,17 @@
 
                 impactTimer = 40;
                 createImpactParticles(player.x + player.width / 2, player.y + player.height / 2);
-
                 playSound('crash');
-                messageEl.innerHTML = '💥 <strong>COLIDIU!</strong><br>Pontuação: <strong>' + score + '</strong><br>Pressione <strong>ESPAÇO</strong> ou clique para jogar de novo';
+
+                // ===== ATUALIZA O RECORDE =====
+                if (score > highScore) {
+                    highScore = score;
+                    localStorage.setItem('corridaFEK_highScore', highScore);
+                    highScoreEl.textContent = 'Recorde: ' + highScore;
+                    messageEl.innerHTML = '💥 <strong>COLIDIU!</strong><br>Pontuação: <strong>' + score + '</strong><br>🏆 <strong>NOVO RECORDE!</strong><br>Pressione <strong>ESPAÇO</strong> ou clique para jogar de novo';
+                } else {
+                    messageEl.innerHTML = '💥 <strong>COLIDIU!</strong><br>Pontuação: <strong>' + score + '</strong><br>Recorde: <strong>' + highScore + '</strong><br>Pressione <strong>ESPAÇO</strong> ou clique para jogar de novo';
+                }
                 return;
             }
 
